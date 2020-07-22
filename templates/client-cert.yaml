@@ -1,0 +1,23 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: client-example-com
+  namespace: mtls
+spec:
+  keyEncoding: pkcs8
+  commonName: client.example.com
+  secretName: client-example-com-tls
+  issuerRef:
+    name: ca-issuer
+---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: client-example-com-tls
+  annotations:
+    cert-utils-operator.redhat-cop.io/generate-java-keystores: "true"
+    cert-utils-operator.redhat-cop.io/generate-cert-info: "true"
+data:
+  tls.crt: ''
+  tls.key: ''
+type: kubernetes.io/tls

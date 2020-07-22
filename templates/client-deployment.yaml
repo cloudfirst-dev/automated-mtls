@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-api
+  namespace: mtls
+  labels:
+    app: product-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-api
+  template:
+    metadata:
+      labels:
+        app: product-api
+    spec:
+      containers:
+        - name: product-api
+          image: quay.io/cloudfirst/product-service:latest
+          volumeMounts:
+          - mountPath: "/tls"
+            name: tls
+          - name: config
+            mountPath: /deployments/config
+      volumes:
+        - name: tls
+          secret:
+            secretName: client-example-com-tls
+        - name: config
+          configMap:
+            name: product
+            defaultMode: 420
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: product
+  namespace: mtls
+data:
+  application.properties: |-
+    dev.cloudfirst.products.RatingClient/mp-rest/url=https://rating.mtls.svc.cluster.local:8443
+    dev.cloudfirst.products.RatingClient/mp-rest/trustStore=/tls/truststore.jks
+    dev.cloudfirst.products.RatingClient/mp-rest/trustStorePassword=changeme
+    dev.cloudfirst.products.RatingClient/mp-rest/keyStore=/tls/keystore.jks
+    dev.cloudfirst.products.RatingClient/mp-rest/keyStorePassword=changeme
+
+    quarkus.ssl.native=true
+    quarkus.log.level=DEBUG
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: product
+  namespace: mtls
+spec:
+  selector:
+    app: product-api
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

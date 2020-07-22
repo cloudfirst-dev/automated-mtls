@@ -1,0 +1,29 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: product
+  namespace: mtls
+spec:
+  to:
+    kind: Service
+    name: product
+    weight: 100
+  port:
+    targetPort: 8080
+  wildcardPolicy: None
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: rating
+  namespace: mtls
+spec:
+  to:
+    kind: Service
+    name: rating
+    weight: 100
+  port:
+    targetPort: 8443
+  tls:
+    termination: passthrough
+  wildcardPolicy: None

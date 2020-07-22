@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rating-api
+  namespace: mtls
+  labels:
+    app: rating-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rating-api
+  template:
+    metadata:
+      labels:
+        app: rating-api
+    spec:
+      containers:
+        - name: rating-api
+          image: quay.io/cloudfirst/rating-service:latest
+          volumeMounts:
+          - mountPath: "/tls"
+            name: tls
+          - name: config
+            mountPath: /deployments/config
+      volumes:
+        - name: tls
+          secret:
+            secretName: server-example-com-tls
+        - name: config
+          configMap:
+            name: rating
+            defaultMode: 420
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: rating
+  namespace: mtls
+data:
+  application.properties: |-
+    quarkus.ssl.native=true
+    quarkus.http.ssl.client-auth=required
+
+    quarkus.http.ssl-port=8443
+    quarkus.http.ssl.certificate.key-store-file=/tls/keystore.jks
+    quarkus.http.ssl.certificate.key-store-password=changeme
+    quarkus.http.ssl.certificate.trust-store-file=/tls/truststore.jks
+    quarkus.http.ssl.certificate.trust-store-password=changeme
+
+    quarkus.http.port=0
+    quarkus.http.test-port=0
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rating
+  namespace: mtls
+spec:
+  selector:
+    app: rating-api
+  ports:
+    - protocol: TCP
+      port: 8443
+      targetPort: 8443

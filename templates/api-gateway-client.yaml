@@ -1,0 +1,11 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: api-gateway-example-com
+  namespace: mtls
+spec:
+  keyEncoding: pkcs8
+  commonName: api-gateway.example.com
+  secretName: api-gateway-example-com-tls
+  issuerRef:
+    name: ca-issuer
