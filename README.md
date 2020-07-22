@@ -1,4 +1,20 @@
-# End Client
+# mTLS Automation
+This example shows how to generate all the required entities to automate all required aspects of the mTLS flow.
+
+*. Creation of a selfissuer to generate a CA to sign all the mTLS certs with
+*. Creation of the CA from the self issuer
+*. Creation of client certs for both the api-gateway and product-service
+*. Creation of server certs for the product-service
+*. Configuration to mount the server and client certs from the secrets to the relevant pods
+
+![](cert-flow.jpg)
+
+# Usage Demonstration
+This demonstrates how to secure inner service communication and also external communication mTLS using cert-manager.  In the first example we demonstrate calling an unsecured endpoint (product-service) which then communicates to the rating-service using mTLS certs generated with cert-manager.  The second scenario demonstrates potentially the flow between an edge api gateway that secures communication with mTLS with its own api-gateway cert.
+
+![](end-user-flow.jpg)
+
+## End Client
 Execute curl to the product service that is unsecure to products and mtls between products and rating services
 1. Get route endpoint and set to an environment variable
     ```
@@ -13,7 +29,7 @@ Execute curl to the product service that is unsecure to products and mtls betwee
     {"id":1,"productName":"Test Product","votes":0}
     ```
 
-# API Gateway mTLS
+## API Gateway mTLS
 Execute curl (acting as an api gateway) to demonstrate securing a backend service with mTLS
 1. Get route endpoint and set to an environment variable
     ```
